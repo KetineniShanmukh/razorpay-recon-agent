@@ -1,0 +1,10 @@
+pandas>=2.2
+numpy>=1.26
+faker>=24.0
+rapidfuzz>=3.6
+python-dateutil>=2.9
+python-dotenv>=1.0
+requests>=2.31
+streamlit>=1.35
+anthropic>=0.30
+pytest>=8.0

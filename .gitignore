@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+.env
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# outputs
+data/generated/
+data/output/
+*.log
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Streamlit
+.streamlit/secrets.toml
