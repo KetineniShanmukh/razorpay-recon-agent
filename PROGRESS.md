@@ -7,7 +7,7 @@ Read this file first at the start of every session — it's the single source of
 **Deadline:** Applications close September 5, 2026
 **Goal:** Agent that closes a finance-ops reconciliation loop across a 50+ record batch, reports match rate + honest exception list.
 
-## Status: Synthetic data generator working. Blocked on git identity + GitHub auth to get first commit pushed.
+## Status: Repo live on GitHub, synthetic data generator working. Ready to build the Razorpay API connector or matching engine next.
 
 ## Done
 - Confirmed git, Python 3.14, GitHub CLI (gh 2.98.0) installed on the machine.
@@ -22,15 +22,17 @@ Read this file first at the start of every session — it's the single source of
   - `tests/test_synthetic_data.py` — 4 tests, all passing (shape/count checks, seed reproducibility, ground-truth consistency, missing-counterpart correctness).
   - Verified end-to-end: 80 transactions -> 85 ledger rows (dupes add rows) -> 3 payments with zero ledger row -> noise breakdown looked realistic on manual inspection (e.g. "Payment fo rWarner-Nelson" typo, date drift, amount mismatch all present).
 
+- GitHub repo created and pushed: https://github.com/KetineniShanmukh/razorpay-recon-agent (public, `main` branch, first commit in).
+- Git identity: `Shanmukh Ketineni <annu.ketineni@gmail.com>` (matches GitHub account KetineniShanmukh), scoped to this repo only.
+- `gh` authenticated as KetineniShanmukh.
+
 ## Next
-1. **Blocked on user:** need a name for git commit authorship (only email is set).
-2. **Blocked on user:** run `gh auth login` interactively (browser flow — Claude can't do this), then Claude creates the public GitHub repo + pushes first commit.
-3. Build Razorpay test-mode API connector (`src/ingest/razorpay_connector.py`) once user's test keys are in `.env` — matches the shape of `synthetic_transactions.py` output so it's a drop-in replacement.
-4. 3-stage matching engine (deterministic -> fuzzy -> LLM-assisted) in `src/matching/`.
-5. Exception classifier in `src/exceptions/`.
-6. Streamlit dashboard in `dashboard/`.
-7. Dockerfile + GitHub Actions CI (`.github/workflows/`).
-8. README with architecture diagram + metrics, deploy live link.
+1. Build Razorpay test-mode API connector (`src/ingest/razorpay_connector.py`) once user's test keys are in `.env` — matches the shape of `synthetic_transactions.py` output so it's a drop-in replacement.
+2. 3-stage matching engine (deterministic -> fuzzy -> LLM-assisted) in `src/matching/`.
+3. Exception classifier in `src/exceptions/`.
+4. Streamlit dashboard in `dashboard/`.
+5. Dockerfile + GitHub Actions CI (`.github/workflows/`).
+6. README with architecture diagram + metrics, deploy live link.
 
 ## How to regenerate synthetic data
 ```
