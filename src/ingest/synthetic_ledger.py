@@ -1,9 +1,10 @@
 """Generates a synthetic "internal ledger" — the second reconciliation data source.
 
 Takes a set of ground-truth gateway transactions (see synthetic_transactions.py)
-and derives a noisy internal ledger from them: typos, date drift, duplicate
-entries, amount mismatches, and missing reference IDs, plus rows that
-genuinely have no counterpart on either side.
+and derives a noisy internal ledger from them: typos, date drift (including
+drift wide enough that no matching stage can resolve it automatically),
+duplicate entries, amount mismatches, fee/tax deltas, and missing reference
+IDs, plus rows that genuinely have no counterpart on either side.
 
 Crucially, this also returns a ground-truth answer key (which ledger row
 really maps to which payment, and what noise was applied). That key must be
@@ -16,13 +17,15 @@ from datetime import timedelta
 
 # Noise applied per ledger row derived from a real transaction.
 NOISE_WEIGHTS = {
-    "clean": 0.55,
+    "clean": 0.45,
     "typo": 0.12,
     "date_drift": 0.10,
     "amount_mismatch": 0.08,
     "missing_reference": 0.06,
     "duplicate": 0.05,
     "missing_counterpart": 0.04,  # payment exists, ledger never records it -> true exception
+    "large_date_drift": 0.05,     # drift beyond both matching stages' windows -> genuinely unresolved
+    "currency_fee_delta": 0.05,   # ledger recorded net-of-fee amount, not gross -> real bookkeeping mismatch
 }
 
 FAKE_VENDOR_LABELS = [
@@ -98,6 +101,14 @@ def generate_ledger(
             row["amount"] = round(row["amount"] * (1 + delta_pct), 2)
         elif noise == "missing_reference":
             row["reference_id"] = ""
+        elif noise == "large_date_drift":
+            drift_days = random.choice([-10, -9, -8, -7, -6, 6, 7, 8, 9, 10])
+            row["date"] = (txn["created_at"] + timedelta(days=drift_days)).date().isoformat()
+        elif noise == "currency_fee_delta":
+            # Ledger recorded the net-of-fee amount instead of the gross amount —
+            # a real bookkeeping mismatch, not random noise.
+            net_paise = txn["amount"] - txn["fee"] - txn["tax"]
+            row["amount"] = round(net_paise / 100, 2)
 
         ledger_rows.append(row)
         ledger_truth.append({
