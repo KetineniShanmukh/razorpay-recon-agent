@@ -6,8 +6,8 @@ dataset and reports measured accuracy against the hidden ground truth.
 
 import argparse
 
+from src.ingest.razorpay_style_generator import generate_payments
 from src.ingest.synthetic_ledger import generate_ledger
-from src.ingest.synthetic_transactions import generate_transactions
 from src.matching.engine import run_matching
 from src.matching.evaluate import evaluate
 
@@ -18,10 +18,10 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
-    transactions = generate_transactions(n=args.num_transactions, seed=args.seed)
-    ledger, ground_truth = generate_ledger(transactions, seed=args.seed)
+    payments = generate_payments(n=args.num_transactions, seed=args.seed)
+    ledger, ground_truth = generate_ledger(payments, seed=args.seed)
 
-    output = run_matching(transactions, ledger)
+    output = run_matching(payments, ledger)
     scored = evaluate(output["results"], ground_truth)
 
     print(f"Ledger rows:                  {scored['total_ledger_rows']}")

@@ -6,7 +6,7 @@ rows with no usable reference ID at all (matched by description + amount +
 date proximity instead).
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 import pandas as pd
 from rapidfuzz import fuzz
@@ -18,6 +18,8 @@ AMBIGUITY_MARGIN = 5  # if best and second-best candidate scores are this close,
 
 
 def _to_date(value) -> date:
+    if isinstance(value, (int, float)):
+        return datetime.fromtimestamp(value, tz=timezone.utc).date()
     if isinstance(value, datetime):
         return value.date()
     if isinstance(value, date):
@@ -80,7 +82,7 @@ def _match_by_description(row, candidate_payments, amount_tolerance_pct, date_wi
     confidence = round((best_score / 100) * 0.85, 3)
     return {
         "ledger_id": row["ledger_id"],
-        "payment_id": best_payment["payment_id"],
+        "payment_id": best_payment["id"],
         "stage": "fuzzy_description",
         "confidence": confidence,
         "reason": (
@@ -100,7 +102,7 @@ def match_fuzzy(
 
     `available_payments` should exclude payments stage 1 already claimed.
     """
-    payments_by_id = {p["payment_id"]: p for p in available_payments}
+    payments_by_id = {p["id"]: p for p in available_payments}
     results = []
 
     for row in unresolved_ledger:

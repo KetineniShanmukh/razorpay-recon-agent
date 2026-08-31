@@ -1,7 +1,7 @@
 """Generates a synthetic "internal ledger" — the second reconciliation data source.
 
-Takes a set of ground-truth gateway transactions (see synthetic_transactions.py)
-and derives a noisy internal ledger from them: typos, date drift (including
+Takes a set of ground-truth payments (see razorpay_style_generator.py) and
+derives a noisy internal ledger from them: typos, date drift (including
 drift wide enough that no matching stage can resolve it automatically),
 duplicate entries, amount mismatches, fee/tax deltas, and missing reference
 IDs, plus rows that genuinely have no counterpart on either side.
@@ -13,7 +13,7 @@ the engine's real accuracy afterwards instead of eyeballing the results.
 """
 
 import random
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 # Noise applied per ledger row derived from a real transaction.
 NOISE_WEIGHTS = {
@@ -79,14 +79,16 @@ def generate_ledger(
 
         if noise == "missing_counterpart":
             # No ledger row is created for this payment at all.
-            unmatched_payment_ids.append(txn["payment_id"])
+            unmatched_payment_ids.append(txn["id"])
             continue
+
+        txn_created_at = datetime.fromtimestamp(txn["created_at"], tz=timezone.utc)
 
         row = {
             "ledger_id": f"LDG{ledger_id_counter:05d}",
-            "reference_id": txn["payment_id"],
+            "reference_id": txn["id"],
             "amount": round(txn["amount"] / 100, 2),  # ledger kept in rupees, gateway in paise
-            "date": txn["created_at"].date().isoformat(),
+            "date": txn_created_at.date().isoformat(),
             "description": txn["description"],
             "vendor_contact": txn["contact"],
         }
@@ -95,7 +97,7 @@ def generate_ledger(
             row["description"] = _typo(row["description"])
         elif noise == "date_drift":
             drift_days = random.choice([-3, -2, -1, 1, 2, 3])
-            row["date"] = (txn["created_at"] + timedelta(days=drift_days)).date().isoformat()
+            row["date"] = (txn_created_at + timedelta(days=drift_days)).date().isoformat()
         elif noise == "amount_mismatch":
             delta_pct = random.uniform(0.01, 0.05) * random.choice([-1, 1])
             row["amount"] = round(row["amount"] * (1 + delta_pct), 2)
@@ -103,7 +105,7 @@ def generate_ledger(
             row["reference_id"] = ""
         elif noise == "large_date_drift":
             drift_days = random.choice([-10, -9, -8, -7, -6, 6, 7, 8, 9, 10])
-            row["date"] = (txn["created_at"] + timedelta(days=drift_days)).date().isoformat()
+            row["date"] = (txn_created_at + timedelta(days=drift_days)).date().isoformat()
         elif noise == "currency_fee_delta":
             # Ledger recorded the net-of-fee amount instead of the gross amount —
             # a real bookkeeping mismatch, not random noise.
@@ -113,7 +115,7 @@ def generate_ledger(
         ledger_rows.append(row)
         ledger_truth.append({
             "ledger_id": row["ledger_id"],
-            "true_payment_id": txn["payment_id"],
+            "true_payment_id": txn["id"],
             "noise_type": noise,
         })
         ledger_id_counter += 1
@@ -124,14 +126,16 @@ def generate_ledger(
             ledger_rows.append(dup_row)
             ledger_truth.append({
                 "ledger_id": dup_row["ledger_id"],
-                "true_payment_id": txn["payment_id"],
+                "true_payment_id": txn["id"],
                 "noise_type": "duplicate",
             })
             ledger_id_counter += 1
 
-    # Ledger-only rows: bookkeeping entries with no real gateway transaction
-    # behind them at all -> guaranteed true exceptions on the ledger side.
-    base_date = transactions[0]["created_at"] if transactions else None
+    # Ledger-only rows: bookkeeping entries with no real payment behind them
+    # at all -> guaranteed true exceptions on the ledger side.
+    base_date = (
+        datetime.fromtimestamp(transactions[0]["created_at"], tz=timezone.utc) if transactions else None
+    )
     for _ in range(extra_ledger_only_rows):
         row = {
             "ledger_id": f"LDG{ledger_id_counter:05d}",

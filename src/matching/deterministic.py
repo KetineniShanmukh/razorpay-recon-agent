@@ -5,7 +5,7 @@ date within a narrow window. This is the cheapest, highest-confidence
 stage — anything it can't resolve falls through to fuzzy matching.
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 import pandas as pd
 
@@ -14,6 +14,8 @@ DATE_WINDOW_DAYS = 1
 
 
 def _to_date(value) -> date:
+    if isinstance(value, (int, float)):
+        return datetime.fromtimestamp(value, tz=timezone.utc).date()
     if isinstance(value, datetime):
         return value.date()
     if isinstance(value, date):
@@ -33,7 +35,7 @@ def match_deterministic(
     Ledger rows with no reference ID, or no exact match, are simply absent
     from the output — the caller decides what happens to them next.
     """
-    payments_by_id = {p["payment_id"]: p for p in payments}
+    payments_by_id = {p["id"]: p for p in payments}
     results = []
 
     for row in ledger:

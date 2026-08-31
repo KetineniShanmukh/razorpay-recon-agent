@@ -35,7 +35,7 @@ def run_matching(payments: list[dict], ledger: list[dict]) -> dict:
     stage1_payment_ids = {c["payment_id"] for c in stage1_candidates}
 
     remaining_ledger = [row for row in ledger if row["ledger_id"] not in stage1_ledger_ids]
-    remaining_payments = [p for p in payments if p["payment_id"] not in stage1_payment_ids]
+    remaining_payments = [p for p in payments if p["id"] not in stage1_payment_ids]
 
     stage2_candidates = match_fuzzy(remaining_ledger, remaining_payments)
 
@@ -85,7 +85,7 @@ def run_matching(payments: list[dict], ledger: list[dict]) -> dict:
             })
 
     matched_payment_ids = {r["payment_id"] for r in results if r["matched"]}
-    unmatched_payment_ids = [p["payment_id"] for p in payments if p["payment_id"] not in matched_payment_ids]
+    unmatched_payment_ids = [p["id"] for p in payments if p["id"] not in matched_payment_ids]
 
     n_matched = sum(1 for r in results if r["matched"])
     stats = {
