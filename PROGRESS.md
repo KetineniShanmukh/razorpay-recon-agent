@@ -7,7 +7,7 @@ Read this file first at the start of every session — it's the single source of
 **Deadline:** Applications close September 5, 2026
 **Goal:** Agent that closes a finance-ops reconciliation loop across a 50+ record batch, reports match rate + honest exception list.
 
-## Status: Matching engine (stages 1+2) working on fully synthetic data. Next: stage 3 (LLM), exception classifier, dashboard.
+## Status: Matching engine + exception classifier both working end to end on fully synthetic data. Next: stage 3 (LLM) once user has an Anthropic key, then dashboard.
 
 ## Done
 - Repo scaffolded: `src/ingest`, `src/matching`, `src/reporting`, `src/exceptions`, `dashboard`, `tests`, `docs`, `.github/workflows`; `.gitignore`, `.env.example`, `requirements.txt`, `README.md`.
@@ -29,14 +29,17 @@ Read this file first at the start of every session — it's the single source of
   - **Important finding, acted on immediately:** first version scored 100% accuracy across 8 different random seeds. That's a red flag, not a win — it meant matching tolerances were suspiciously well-matched to the noise ranges (both designed by the same code). Added two new noise types that stages 1+2 genuinely cannot resolve on their own: `large_date_drift` (6-10 days, beyond both stages' date windows — real misses, motivates stage 3) and `currency_fee_delta` (ledger records net-of-fee amount instead of gross — matches the buildathon's named "currency/fee delta" exception category). Re-tested: **measured accuracy now varies 93-99% across seeds, with real, non-cherry-picked mistakes every run** — this is the honest signal the buildathon scoring bar wants.
   - Fixed a cosmetic bug: em dashes in printed output showed as `�` in Windows terminals (console codepage) — replaced with `-` in user-facing print/reason strings.
 
-- `tests/test_synthetic_data.py` (6 tests) + `tests/test_matching.py` (5 tests) — 11 tests total, all passing.
+- **Exception classifier built and tested — this is a required buildathon deliverable, treated as such, not skipped for time:**
+  - `src/exceptions/classifier.py` — `classify_exceptions(results, payments, ledger)` tags every unresolved row with a real reason, re-deriving near-miss info the matching stages don't keep around (they only report accepted matches). Categories: the four the buildathon brief names explicitly (`amount_mismatch`, `missing_counterpart`, `likely_duplicate`, `currency_fee_delta`), plus two bonus categories for more precise honesty (`date_drift` for rows where only the date is the problem, `ambiguous_match` for rows with two+ similarly-scoring candidates — genuinely unclear cases, exactly what stage 3 LLM resolution is for). `currency_fee_delta` detection checks whether the amount gap is suspiciously close to the payment's own fee+tax, not just "amount is off." `summarize_exceptions()` gives the headline counts-by-type.
+  - `src/matching/run_eval.py` now prints the full classified exception list alongside match rate and accuracy — verified output shows real reasons like "date is off by 9 days - beyond the 5-day auto-match window," not a bare "unresolved."
+  - `tests/test_exceptions.py` — 8 tests, each with a hand-crafted fixture that deliberately falls outside stage 1+2's tolerance (first draft of these tests had 3 failures because the fixtures were accidentally *within* tolerance and got legitimately matched — fixed by making the scenarios genuinely unresolvable, e.g. shrinking payment amount so fee+tax exceeds the 6% fuzzy tolerance, using tied descriptions to force real ambiguity). Also one test running the classifier over a full 80-payment generated dataset asserting every unmatched row gets a non-null type + explanation.
+  - 19/19 tests passing project-wide.
 
 ## Next
-1. Stage 3: LLM-assisted resolution for anything stage 1+2 leave unresolved, with reasoning logged as an audit trail — needs an Anthropic/OpenAI key in `.env`.
-2. Exception classifier in `src/exceptions/` — tag every unresolved record with why (amount mismatch, missing counterpart, likely duplicate, currency/fee delta). Much of the raw signal already exists in `engine.py`'s output (e.g. `exception_type: "likely_duplicate"` is already set for conflict losers) — this module mainly needs to classify the plain `"unresolved"` rows.
-3. Streamlit dashboard in `dashboard/`.
-4. Dockerfile + GitHub Actions CI (`.github/workflows/`).
-5. README with architecture diagram + metrics, deploy live link.
+1. Stage 3: LLM-assisted resolution for anything stage 1+2 leave unresolved, with reasoning logged as an audit trail — **blocked on user getting an Anthropic API key** (console.anthropic.com — signup needs phone verification, likely a small one-time free credit; cost for our volume will be a few cents total, negligible). Natural targets for stage 3: the `ambiguous_match` and `missing_counterpart`-with-a-decent-near-miss cases the classifier already surfaces.
+2. Streamlit dashboard in `dashboard/`.
+3. Dockerfile + GitHub Actions CI (`.github/workflows/`).
+4. README with architecture diagram + metrics, deploy live link.
 
 ## How to run things
 ```bash

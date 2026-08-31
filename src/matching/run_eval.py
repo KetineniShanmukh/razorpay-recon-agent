@@ -6,6 +6,7 @@ dataset and reports measured accuracy against the hidden ground truth.
 
 import argparse
 
+from src.exceptions.classifier import classify_exceptions, summarize_exceptions
 from src.ingest.razorpay_style_generator import generate_payments
 from src.ingest.synthetic_ledger import generate_ledger
 from src.matching.engine import run_matching
@@ -22,6 +23,7 @@ def main() -> None:
     ledger, ground_truth = generate_ledger(payments, seed=args.seed)
 
     output = run_matching(payments, ledger)
+    classified_results = classify_exceptions(output["results"], payments, ledger)
     scored = evaluate(output["results"], ground_truth)
 
     print(f"Ledger rows:                  {scored['total_ledger_rows']}")
@@ -40,9 +42,23 @@ def main() -> None:
     for stage, count in output["stats"]["by_stage"].items():
         print(f"  {stage}: {count}")
 
+    exception_summary = summarize_exceptions(classified_results)
+    total_exceptions = sum(exception_summary.values())
+    print()
+    print(f"Exception list: {total_exceptions} unresolved row(s), classified by reason:")
+    for exception_type, count in exception_summary.items():
+        print(f"  {exception_type}: {count}")
+
+    print()
+    print("Full exception list (honest - every unresolved row, not cherry-picked):")
+    for r in classified_results:
+        if r["matched"]:
+            continue
+        print(f"  [{r['exception_type']}] ledger={r['ledger_id']} - {r['explanation']}")
+
     if scored["mistakes"]:
         print()
-        print(f"{len(scored['mistakes'])} mistake(s) - honest list, not cherry-picked:")
+        print(f"{len(scored['mistakes'])} scoring mistake(s) vs ground truth - honest, not cherry-picked:")
         for m in scored["mistakes"]:
             print(
                 f"  [{m['error_type']}] ledger={m['ledger_id']} engine_said={m['payment_id']} "
@@ -50,7 +66,7 @@ def main() -> None:
             )
     else:
         print()
-        print("No mistakes on this run.")
+        print("No scoring mistakes on this run (vs ground truth).")
 
 
 if __name__ == "__main__":
