@@ -7,7 +7,7 @@ Read this file first at the start of every session — it's the single source of
 **Deadline:** Applications close September 5, 2026
 **Goal:** Agent that closes a finance-ops reconciliation loop across a 50+ record batch, reports match rate + honest exception list.
 
-## Status: Full pipeline (all 3 stages + classifier + dashboard) working end to end, verified live in a browser. Next: Docker + CI, README, deploy link.
+## Status: Full pipeline + dashboard + Docker + CI all in place. Next: verify CI actually passes on GitHub, then README + deploy link.
 
 ## Done
 - Repo scaffolded: `src/ingest`, `src/matching`, `src/reporting`, `src/exceptions`, `dashboard`, `tests`, `docs`, `.github/workflows`; `.gitignore`, `.env.example`, `requirements.txt`, `README.md`.
@@ -55,8 +55,14 @@ Read this file first at the start of every session — it's the single source of
   - `tests/test_reporting.py` — 6 tests covering CSV round-trip type safety (including the missing-reference-as-empty-string-not-NaN edge case), uploaded data flowing through the matching engine without error, and report content correctness.
   - 31/31 tests passing project-wide.
 
+- **Dockerfile + GitHub Actions CI added:**
+  - `Dockerfile` — `python:3.12-slim` base (not 3.14, which is what's installed locally — chose a widely-available stable version for broad compatibility rather than matching the exact local dev version), installs `requirements.txt`, copies `src/` + `dashboard/`, exposes 8501, healthcheck via Python's own `urllib` (avoids adding curl just for that). Entry point runs the Streamlit dashboard.
+  - `.dockerignore` — excludes `.venv/`, `data/`, `.env`, `tests/`, docs, git metadata from the image.
+  - **Docker itself isn't installed on this dev machine.** Installing Docker Desktop (needs WSL2, 15-30+ min, possible restart) wasn't worth the time cost 3 days before the deadline — asked the user, they agreed to verify via GitHub Actions instead, which has Docker built into its runners. `.github/workflows/ci.yml` has two jobs: `test` (installs deps, runs the full pytest suite — no API key needed since stage 3 tests mock the Anthropic client) and `docker-build` (needs: test) which actually builds the image, runs a container, and polls Streamlit's `/_stcore/health` endpoint for up to 60s to confirm it genuinely serves traffic — not just "did the build not error."
+  - **Not yet confirmed passing** — pushed but CI run not yet checked. Next session (or later this session): check the Actions tab / `gh run list` and fix anything that fails. This is real, unverified-by-a-human-yet infrastructure, flagged honestly rather than assumed working.
+
 ## Next
-1. Dockerfile + GitHub Actions CI (`.github/workflows/`).
+1. **Verify the CI run actually passes on GitHub** — check `gh run list` / the Actions tab after pushing, fix anything broken.
 2. README with architecture diagram + metrics, deploy live link (Streamlit Community Cloud is the plan — free, straightforward, needs the `ANTHROPIC_API_KEY` set as a Streamlit secret for stage 3 to work on the deployed instance).
 3. Deploy and get the live link.
 

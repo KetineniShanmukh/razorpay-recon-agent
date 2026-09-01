@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run test suite
+        # The stage 3 tests use a fake Anthropic client - no API key needed.
+        run: pytest tests/ -v
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t razorpay-recon-agent:ci .
+
+      - name: Run container and verify it actually serves traffic
+        run: |
+          docker run -d --name recon-test -p 8501:8501 razorpay-recon-agent:ci
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8501/_stcore/health; then
+              echo "Dashboard is healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Dashboard did not become healthy in time"
+          docker logs recon-test
+          exit 1
+
+      - name: Show container logs (always, for debugging)
+        if: always()
+        run: docker logs recon-test || true
