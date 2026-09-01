@@ -7,7 +7,7 @@ Read this file first at the start of every session — it's the single source of
 **Deadline:** Applications close September 5, 2026
 **Goal:** Agent that closes a finance-ops reconciliation loop across a 50+ record batch, reports match rate + honest exception list.
 
-## Status: All 3 matching stages + exception classifier working end to end, verified against the real Anthropic API. Next: Streamlit dashboard, Docker + CI, README.
+## Status: Full pipeline (all 3 stages + classifier + dashboard) working end to end, verified live in a browser. Next: Docker + CI, README, deploy link.
 
 ## Done
 - Repo scaffolded: `src/ingest`, `src/matching`, `src/reporting`, `src/exceptions`, `dashboard`, `tests`, `docs`, `.github/workflows`; `.gitignore`, `.env.example`, `requirements.txt`, `README.md`.
@@ -45,10 +45,20 @@ Read this file first at the start of every session — it's the single source of
   - `tests/test_llm_resolve.py` — 6 tests, all using a fake Anthropic client (no real API calls, no cost, no key needed to run the suite/CI). Covers: match decision flips a row, no-match decision keeps it unresolved with reasoning appended, malformed JSON response handled gracefully, empty response from max_tokens truncation diagnosed correctly, model refusal diagnosed with category, and no payment ever gets claimed by two rows even under an adversarial fake client that tries to match everything to the same payment.
   - 25/25 tests passing project-wide.
 
+- **Streamlit dashboard built and verified live in a browser (not just "should work") — this is a required deliverable:**
+  - `dashboard/app.py` — full flow: choose data source (generate synthetic demo data in-app, or upload payments.csv + internal_ledger.csv) -> preview loaded data -> run reconciliation (stages 1+2 always, stage 3 opt-in via checkbox) -> results table (filterable: all/matched/exceptions) -> exception list with a bar chart by type -> stage 3 audit trail (expandable per row: reasoning, candidates shown, full prompt) -> download buttons (full results CSV, exceptions-only CSV, plain-text summary report).
+  - `src/reporting/loaders.py` — `load_payments_csv()` / `load_ledger_csv()` for user-uploaded files. Does explicit native-type casting rather than trusting pandas' inferred dtypes, because numpy scalar types (e.g. `np.int64`) don't reliably pass the `isinstance()` checks the matching/classifier code relies on for date parsing — a real landmine that would have caused silent wrong behavior on uploaded data specifically, caught before it shipped.
+  - `src/reporting/report.py` — `results_to_dataframe()` and `build_summary_text()`, kept separate from the Streamlit script so this logic is unit-testable without a running dashboard.
+  - Honesty detail: "Measured accuracy" only shows when ground truth exists (i.e. only for generated demo data) — for user-uploaded real data it correctly shows "N/A" with an explanation, rather than fabricating a number with no ground truth to check against.
+  - Verified live via a real browser session (not just code review): generated 80 payments, ran stages 1+2 (90.2% match rate, 97.6% accuracy), then ran stage 3 from the UI with the real Anthropic key (match rate rose to 92.7%, accuracy to 100%, audit trail expanders rendered with full reasoning/candidates/prompt per row) — matches CLI output exactly.
+  - `.claude/launch.json` added so the dashboard can be previewed via `streamlit run dashboard/app.py` (or the project's preview tooling) without extra setup.
+  - `tests/test_reporting.py` — 6 tests covering CSV round-trip type safety (including the missing-reference-as-empty-string-not-NaN edge case), uploaded data flowing through the matching engine without error, and report content correctness.
+  - 31/31 tests passing project-wide.
+
 ## Next
-1. Streamlit dashboard in `dashboard/` — upload -> run -> results table -> exception list -> downloadable report. This is the next required deliverable.
-2. Dockerfile + GitHub Actions CI (`.github/workflows/`).
-3. README with architecture diagram + metrics, deploy live link.
+1. Dockerfile + GitHub Actions CI (`.github/workflows/`).
+2. README with architecture diagram + metrics, deploy live link (Streamlit Community Cloud is the plan — free, straightforward, needs the `ANTHROPIC_API_KEY` set as a Streamlit secret for stage 3 to work on the deployed instance).
+3. Deploy and get the live link.
 
 ## How to run things
 ```bash

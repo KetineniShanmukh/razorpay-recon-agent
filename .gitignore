@@ -17,6 +17,7 @@ data/output/
 .DS_Store
 .vscode/
 .idea/
+.claude/
 
 # Streamlit
 .streamlit/secrets.toml
