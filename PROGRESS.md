@@ -7,7 +7,7 @@ Read this file first at the start of every session — it's the single source of
 **Deadline:** Applications close September 5, 2026
 **Goal:** Agent that closes a finance-ops reconciliation loop across a 50+ record batch, reports match rate + honest exception list.
 
-## Status: Full pipeline + dashboard + Docker + CI all in place and verified (CI genuinely green on GitHub). Next: README + deploy link — last two items.
+## Status: All required deliverables built + verified. README written. Only remaining item: user deploys to Streamlit Cloud (needs their own account/action). Pitch prep materials also built.
 
 ## Done
 - Repo scaffolded: `src/ingest`, `src/matching`, `src/reporting`, `src/exceptions`, `dashboard`, `tests`, `docs`, `.github/workflows`; `.gitignore`, `.env.example`, `requirements.txt`, `README.md`.
@@ -61,9 +61,16 @@ Read this file first at the start of every session — it's the single source of
   - **Docker itself isn't installed on this dev machine.** Installing Docker Desktop (needs WSL2, 15-30+ min, possible restart) wasn't worth the time cost 3 days before the deadline — asked the user, they agreed to verify via GitHub Actions instead, which has Docker built into its runners. `.github/workflows/ci.yml` has two jobs: `test` (installs deps, runs the full pytest suite — no API key needed since stage 3 tests mock the Anthropic client) and `docker-build` (needs: test) which actually builds the image, runs a container, and polls Streamlit's `/_stcore/health` endpoint for up to 60s to confirm it genuinely serves traffic — not just "did the build not error."
   - **Verified passing on GitHub Actions** (`gh run watch`): both `test` (43s) and `docker-build` (37s) jobs succeeded — the Docker image genuinely built AND the health-check step confirmed the running container actually served traffic on port 8501, not just "the build didn't error." Run: https://github.com/KetineniShanmukh/razorpay-recon-agent/actions
 
+- **README.md fully written** — architecture (mermaid diagram), plain explanation of each matching stage, an honest 9-seed accuracy sweep table (93.1%-98.9%, ~96.1% average for stages 1+2 — explicitly explained why the range matters more than a single number, referencing the earlier 100%-accuracy red flag), dashboard description, local run instructions, Docker/CI section, project structure. Still has a placeholder for the live deploy link.
+
+- **Pitch/interview prep built — user explicitly asked to be able to "answer everything" in a 5-min video + Q&A, and was honest that they don't yet deeply understand every piece (fast build pace, learning deferred to after completion by their own choice).** Three docs in `docs/`:
+  - `docs/EXPLAINER.md` — the whole project explained in plain English, teaching tone, building from "what problem does this solve" up through every component (data/ground-truth methodology, 3-stage matching engine with an airport-security-lane analogy, exception classifier, why the accuracy numbers can be trusted, dashboard, Docker/CI), ending with a list of things built beyond the minimum ask worth having ready to mention.
+  - `docs/PITCH_SCRIPT.md` — a timed 5-minute video script (hook -> what was built -> live demo -> honest results story -> why the LLM stage matters -> close), explicit instruction to internalize rather than memorize verbatim, plus a pre-recording checklist.
+  - `docs/QA_PREP.md` — anticipated questions grouped by theme (data/scope, architecture/design, accuracy/honesty, LLM specifics, engineering/deployment, product framing, personal/growth) with model answers explaining the *reasoning*, not just the fact — includes questions a technical judge would ask (how do you prevent double-matching, what happens when the LLM response fails to parse) and ones a non-technical judge would ask (who would use this, what do they walk away with). One question ("what did you learn") is deliberately left for the user to answer genuinely rather than scripted.
+
 ## Next
-1. README with architecture diagram + metrics, deploy live link (Streamlit Community Cloud is the plan — free, straightforward, needs the `ANTHROPIC_API_KEY` set as a Streamlit secret for stage 3 to work on the deployed instance).
-2. Deploy and get the live link.
+1. **User deploys to Streamlit Community Cloud** — needs their own account + GitHub authorization + pasting the API key into Streamlit's secrets UI, none of which Claude can do on their behalf. Steps already given to user in chat. Once deployed, update the README's placeholder deploy link.
+2. User should read the three pitch-prep docs, practice the script with a timer, and rehearse Q&A out loud — the docs are prep material, not a substitute for actually understanding the project.
 
 ## How to run things
 ```bash
