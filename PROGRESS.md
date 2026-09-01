@@ -7,7 +7,7 @@ Read this file first at the start of every session — it's the single source of
 **Deadline:** Applications close September 5, 2026
 **Goal:** Agent that closes a finance-ops reconciliation loop across a 50+ record batch, reports match rate + honest exception list.
 
-## Status: Matching engine + exception classifier both working end to end on fully synthetic data. Next: stage 3 (LLM) once user has an Anthropic key, then dashboard.
+## Status: All 3 matching stages + exception classifier working end to end, verified against the real Anthropic API. Next: Streamlit dashboard, Docker + CI, README.
 
 ## Done
 - Repo scaffolded: `src/ingest`, `src/matching`, `src/reporting`, `src/exceptions`, `dashboard`, `tests`, `docs`, `.github/workflows`; `.gitignore`, `.env.example`, `requirements.txt`, `README.md`.
@@ -35,11 +35,20 @@ Read this file first at the start of every session — it's the single source of
   - `tests/test_exceptions.py` — 8 tests, each with a hand-crafted fixture that deliberately falls outside stage 1+2's tolerance (first draft of these tests had 3 failures because the fixtures were accidentally *within* tolerance and got legitimately matched — fixed by making the scenarios genuinely unresolvable, e.g. shrinking payment amount so fee+tax exceeds the 6% fuzzy tolerance, using tied descriptions to force real ambiguity). Also one test running the classifier over a full 80-payment generated dataset asserting every unmatched row gets a non-null type + explanation.
   - 19/19 tests passing project-wide.
 
+- **Stage 3 (LLM-assisted resolution) built, tested with mocks, and verified against the real API:**
+  - User got an Anthropic key (console.anthropic.com signup needed phone verification + a valid card — their first card was declined, a second card worked; free trial credit covers this project's usage many times over). Key lives in local `.env` (gitignored), never shared in chat. Verified working with a live 1-token test call before building anything on top of it.
+  - `src/matching/llm_resolve.py` — `resolve_with_llm()`. Only touches rows a human would resolve by judgment, not rule: `date_drift`, `amount_mismatch`, `currency_fee_delta` (valid reference ID, just past auto-match tolerance), `missing_counterpart`, and `ambiguous_match`. Excludes `likely_duplicate` — conflict resolution already has a definitive winner there, nothing left to judge. For each eligible row, shows Claude the ledger row + up to 3 unclaimed candidate payments + the classifier's own explanation, and requires a JSON decision with reasoning. Processes rows sequentially, removing a payment from the available pool the moment it's claimed, so the LLM can never double-book a payment across two rows. Model: `claude-opus-5` per Anthropic's current guidance (never downgrade for cost without being asked — and at our volume, cost is negligible either way).
+  - **Two real bugs found and fixed during live testing** (not caught by mocked tests, since mocks don't reproduce real API response shapes):
+    1. First live run: one row's response came back completely empty and failed to parse. Root cause: Opus 5 runs adaptive thinking on by default, and `max_tokens=1024` let thinking alone consume the whole budget, leaving zero tokens for the actual JSON answer. Fixed by raising `max_tokens` to 4096 and setting `output_config={"effort": "medium"}` (this is a bounded judgment call, not deep reasoning — no need for default "high" effort).
+    2. Second live run (after the fix): a different row came back with `stop_reason="refusal"` — the model declined to answer a completely benign reconciliation question. Rare, but real. It already degraded safely (logged as an unresolved exception, no crash, no forced bad match) — but the audit trail just said "response was empty," not why. Added explicit `stop_reason == "refusal"` handling that captures `stop_details.category` so the audit trail explains the actual cause.
+  - `src/matching/run_eval.py` now has a `--use-llm` flag: prints stages-1+2-only AND stages-1+2+3 reports side by side (honest before/after, not just the improved number), writes the full audit trail to `data/generated/stage3_audit_log.json` (gitignored). Live result on an 80-payment run: measured accuracy went from 97.6% (stages 1+2) to **100%** (stages 1+2+3) — the two genuine `date_drift` misses stage 1+2 couldn't resolve got correctly matched with sound reasoning ("date just recorded late, same vendor"), while true exceptions (ledger-only rows with no real counterpart) were correctly *confirmed* as exceptions, not force-matched.
+  - `tests/test_llm_resolve.py` — 6 tests, all using a fake Anthropic client (no real API calls, no cost, no key needed to run the suite/CI). Covers: match decision flips a row, no-match decision keeps it unresolved with reasoning appended, malformed JSON response handled gracefully, empty response from max_tokens truncation diagnosed correctly, model refusal diagnosed with category, and no payment ever gets claimed by two rows even under an adversarial fake client that tries to match everything to the same payment.
+  - 25/25 tests passing project-wide.
+
 ## Next
-1. Stage 3: LLM-assisted resolution for anything stage 1+2 leave unresolved, with reasoning logged as an audit trail — **blocked on user getting an Anthropic API key** (console.anthropic.com — signup needs phone verification, likely a small one-time free credit; cost for our volume will be a few cents total, negligible). Natural targets for stage 3: the `ambiguous_match` and `missing_counterpart`-with-a-decent-near-miss cases the classifier already surfaces.
-2. Streamlit dashboard in `dashboard/`.
-3. Dockerfile + GitHub Actions CI (`.github/workflows/`).
-4. README with architecture diagram + metrics, deploy live link.
+1. Streamlit dashboard in `dashboard/` — upload -> run -> results table -> exception list -> downloadable report. This is the next required deliverable.
+2. Dockerfile + GitHub Actions CI (`.github/workflows/`).
+3. README with architecture diagram + metrics, deploy live link.
 
 ## How to run things
 ```bash
@@ -62,7 +71,8 @@ Read this file first at the start of every session — it's the single source of
 - Payments carry amount in paise (int) and created_at as a Unix timestamp (int), matching Razorpay's real API conventions exactly; the derived internal ledger stores amount in rupees (float) and date as an ISO string — this mismatch is intentional, it's the kind of unit friction a real internal ledger has and the matching engine must normalize it.
 - Ground truth (which ledger row maps to which real payment, and what noise was injected) is generated but deliberately kept out of the matching engine's input — it's only used afterwards to score real accuracy. Buildathon scoring explicitly wants "measured accuracy," not a self-reported one.
 - Settlements are generated (schema-authentic) but not yet part of the matching/reconciliation loop — payment-level reconciliation is the core deliverable; settlement-level reconciliation is optional future scope, not required for the "one finance-ops loop" bar.
-- Deadline context: applications for the Razorpay AI Buildathon close September 5, 2026 (**4 days out as of 2026-09-01** — tight, prioritize the required deliverables: stage 3, exception classifier, dashboard, deploy link, README — over nice-to-haves like settlement-level matching).
+- Deadline context: applications for the Razorpay AI Buildathon close September 5, 2026 (**3 days out as of 2026-09-02** — all matching/classification/LLM logic is done; remaining work is dashboard, Docker/CI, and README, prioritize those over any further nice-to-haves).
+- Anthropic billing: user's first card was declined on Anthropic's checkout (generic "check your card details" error — likely an Indian-card international-transactions restriction); a second card worked. Not a code issue, no action needed here, just noted in case billing comes up again.
 
 ## Open questions / blockers
 None currently — data layer and matching engine (stages 1+2) are unblocked and working end to end.
