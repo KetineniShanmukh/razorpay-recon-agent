@@ -130,6 +130,21 @@ summary report.
 One honesty detail: "measured accuracy" only displays when ground truth exists — i.e. only for
 generated demo data. Uploaded real data correctly shows "N/A" instead of a fabricated number.
 
+### Trying stage 3 yourself
+
+Everything in the dashboard is open with no login — generating data, uploading your own files,
+running stages 1+2, the results table, the exception list, every download — except one checkbox:
+**"Also run stage 3 (LLM-assisted resolution)"** is gated behind a passcode.
+
+That's deliberate, not evasive: stage 3 makes real Anthropic API calls billed to my account, and
+the dashboard is a public link with no authentication. Without a gate, anyone who found the link
+could spam that checkbox and run up a real bill with no rate limit. The gate fails *closed* — if
+the passcode isn't configured at all, stage 3 stays locked for everyone, including me, rather than
+defaulting open.
+
+**Passcode: `buildathon2026`** — enter it in the text field above the checkbox to unlock stage 3.
+It's not a real secret, just an anti-abuse gate — evaluators should feel free to use it.
+
 ## Running it locally
 
 ```bash
