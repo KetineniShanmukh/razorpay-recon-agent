@@ -9,7 +9,14 @@ Fill in your live deploy link before recording. Practice with a timer at least t
 
 ---
 
-## 0:00 – 0:25 — Hook (25s)
+## 0:00 – 0:10 — Self-intro (10s)
+
+*(Face to camera. Keep this genuinely short — one sentence, not a bio.)*
+
+> "Hi, I'm Shanmukh Ketineni, a final-year ECE student, and I built a reconciliation agent for the
+> AI Finance Controller track."
+
+## 0:10 – 0:35 — Hook (25s)
 
 > "Every company that takes payments has to prove their bank records match their internal books.
 > In practice, they never line up perfectly — typos, late entries, duplicate rows, small fee
