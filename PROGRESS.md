@@ -7,7 +7,7 @@ Read this file first at the start of every session — it's the single source of
 **Deadline:** Applications close September 5, 2026
 **Goal:** Agent that closes a finance-ops reconciliation loop across a 50+ record batch, reports match rate + honest exception list.
 
-## Status: PROJECT COMPLETE. All required deliverables built, verified, and live. Remaining work is optional (pitch prep, further polish) — no required items left.
+## Status: PROJECT COMPLETE + hardened after an honest self-critique. ⚠️ ACTION NEEDED FROM USER: add `STAGE3_PASSCODE` to Streamlit Cloud secrets — until then, stage 3 is locked for everyone including the owner (fails closed by design, safer than leaving it open).
 
 ## Done
 - Repo scaffolded: `src/ingest`, `src/matching`, `src/reporting`, `src/exceptions`, `dashboard`, `tests`, `docs`, `.github/workflows`; `.gitignore`, `.env.example`, `requirements.txt`, `README.md`.
@@ -74,7 +74,18 @@ Read this file first at the start of every session — it's the single source of
 
 - README's live-demo link and the pitch script's placeholder URL both updated to the real deployed link.
 
-## Next (all optional — no required deliverables remain)
+- **Self-requested critical review of the deployed app, then fixed everything real it found:** user asked for an honest critique, not reassurance. Actually tested live (not just read code): clicked through both data paths, tested upload for the first time, checked mobile, inspected DOM directly for the passcode/checkbox state. Found and fixed:
+  1. **Real security/cost issue**: stage-3 checkbox was enabled for any public visitor with no auth — anyone could trigger unlimited billed API calls. Fixed with a `STAGE3_PASSCODE` gate that fails closed (no passcode set = locked everywhere, zero exposure window between deploy and setting the secret).
+  2. No way to download the generated CSVs to test the upload flow — added download buttons right after generation.
+  3. `missing_counterpart` explanations were byte-identical across rows (looked templated) — now include the row's own amount/date/description, genuinely distinct per row.
+  4. Chart and table text were truncated (`missing_counter...`, explanations cut mid-sentence) — replaced with an Altair chart (explicit `labelLimit`) and a full-text per-row exception list.
+  - All four verified working via direct DOM inspection + screenshots in a local browser session before pushing, not just assumed from the diff. 31/31 tests still passing.
+  - Pushed into a non-fast-forward conflict with a `.devcontainer/devcontainer.json` the user had added directly on GitHub — unrelated, no overlap, resolved with a clean rebase.
+
+## Next
+- **User must add `STAGE3_PASSCODE` to the Streamlit Cloud app's secrets** (same place as `ANTHROPIC_API_KEY`) — pick any value, e.g. `STAGE3_PASSCODE = "whatever-you-want"`. Until this is done, stage 3 is locked on the live deployed app. Locally, `.env` already has a test value (`test-local-1234`) for development — change it to something real if desired.
+
+## Next (all optional beyond the passcode secret — no other required deliverables remain)
 1. User should read the three pitch-prep docs (`docs/EXPLAINER.md`, `docs/PITCH_SCRIPT.md`, `docs/QA_PREP.md`), practice the script with a timer, and rehearse Q&A out loud — the docs are prep material, not a substitute for actually understanding the project. This is what the user is dedicating time to next.
 2. If there's time left after that: settlement-level reconciliation (settlements are already generated, just not wired into matching), batching stage-3 LLM calls, multi-currency support — none of these are required, just possible extensions if the user wants to keep building.
 
