@@ -42,8 +42,17 @@ have — the brief explicitly allows this.")*
 > not a number I'm just claiming." *(Point at the metrics.)* "Here's the results table, filterable
 > down to just the exceptions." *(Click the exceptions filter.)* "And here's the breakdown by
 > reason — this one's a duplicate entry we correctly caught and flagged instead of double-counting,
-> this one's a payment recorded 9 days late." *(If time allows, toggle stage 3 on and show one
-> audit trail entry expand with its reasoning.)*
+> this one's a payment recorded 9 days late."
+
+*(If time allows, show stage 3 — this is also a good moment to mention the passcode gate, since it
+demonstrates you thought about production concerns, not just making the demo work once:)*
+
+> "One thing worth pointing out — stage 3 is passcode-protected on this public link." *(Type the
+> passcode into the field.)* "That's not me hiding a feature. This dashboard is a public URL with
+> no login, and stage 3 makes real API calls billed to my account — without a gate, anyone who
+> found the link could spam that button and run up a real bill. It's documented in the README along
+> with why." *(Check the box, click Run again, expand one audit trail entry.)* "And here's the
+> actual reasoning behind one of its decisions — not just a verdict, the full logged explanation."
 
 ## 2:40 – 3:40 — The honest results (60s)
 
@@ -82,6 +91,9 @@ have — the brief explicitly allows this.")*
 - [ ] Deploy link is live and works (test it fresh, in an incognito window)
 - [ ] Dashboard demo data generates in a few seconds — don't demo on a slow connection
 - [ ] Practice the live-demo section separately until the clicks are muscle memory
+- [ ] If showing stage 3: know the passcode is in the README and have it ready to type without
+      fumbling for it on camera (it's `buildathon2026` unless you've since changed the Streamlit
+      Cloud secret — check it still matches before recording)
 - [ ] Time yourself at least twice with a stopwatch — most people run long on the first pass
 - [ ] Have a backup: if the live demo breaks during recording, know you can fall back to describing
       the dashboard from a screenshot instead of dead air
