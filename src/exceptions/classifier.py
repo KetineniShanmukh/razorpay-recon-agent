@@ -103,11 +103,13 @@ def _classify_without_reference(ledger_row: dict, all_payments: list[dict]) -> d
     scored.sort(key=lambda x: x[0], reverse=True)
 
     if not scored or scored[0][0] < NEAR_MISS_DESCRIPTION_THRESHOLD:
+        row_desc = ledger_row.get("description") or "(no description)"
         return {
             "exception_type": "missing_counterpart",
             "explanation": (
-                "No reference ID, and no candidate payment found with a similar description, "
-                "amount, or date."
+                f"No reference ID. Ledger shows Rs.{ledger_row['amount']:.2f} on {ledger_row['date']} "
+                f"for \"{row_desc}\", but no payment in the dataset has a similar description, "
+                f"amount, or date within tolerance."
             ),
         }
 

@@ -12,6 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
@@ -68,6 +69,23 @@ def get_anthropic_key() -> str | None:
     except Exception:
         pass
     return os.getenv("ANTHROPIC_API_KEY")
+
+
+def get_stage3_passcode() -> str | None:
+    """Gate on a shared passcode, not just an API key being present.
+
+    Without this, anyone who finds the public deploy link can tick the stage
+    3 checkbox and trigger unlimited real API calls billed to the owner's
+    key - fails closed (no passcode configured -> stage 3 stays locked)
+    rather than failing open, so this protects the deployment the moment
+    it ships, before anyone has had a chance to set the secret.
+    """
+    try:
+        if "STAGE3_PASSCODE" in st.secrets:
+            return st.secrets["STAGE3_PASSCODE"]
+    except Exception:
+        pass
+    return os.getenv("STAGE3_PASSCODE")
 
 
 @st.cache_data
@@ -129,6 +147,22 @@ if data_source == "Generate synthetic demo data":
         st.session_state.results = None
         st.session_state.audit_log = None
         st.success(f"Generated {len(payments)} payments and {len(ledger)} ledger rows.")
+
+    if st.session_state.payments is not None and st.session_state.ground_truth is not None:
+        st.caption("Want to try the upload flow? Download these and re-upload them below.")
+        gen_dl_cols = st.columns(2)
+        gen_dl_cols[0].download_button(
+            "Download generated payments (CSV)",
+            pd.DataFrame(st.session_state.payments).to_csv(index=False),
+            file_name="payments.csv",
+            mime="text/csv",
+        )
+        gen_dl_cols[1].download_button(
+            "Download generated ledger (CSV)",
+            pd.DataFrame(st.session_state.ledger).to_csv(index=False),
+            file_name="internal_ledger.csv",
+            mime="text/csv",
+        )
 else:
     st.caption(
         "Payments CSV must match Razorpay's real payment schema (`id`, `amount`, `currency`, "
@@ -163,10 +197,33 @@ st.divider()
 st.header("⚙️ 2. Run reconciliation")
 
 api_key = get_anthropic_key()
+required_passcode = get_stage3_passcode()
+
+# Fails closed: no STAGE3_PASSCODE configured means stage 3 stays locked,
+# full stop - not "locked with a warning but actually still usable." This
+# matters most in the exact window right after this code first deploys,
+# before the secret has been set - there should be zero window where a
+# public visitor can trigger billed API calls.
+if required_passcode:
+    entered_passcode = st.text_input(
+        "Passcode to enable stage 3 (LLM-assisted resolution)",
+        type="password",
+        help="Stage 3 makes real API calls billed to the deployment owner - ask them for the passcode.",
+    )
+    stage3_unlocked = entered_passcode == required_passcode
+    if entered_passcode and not stage3_unlocked:
+        st.caption("Incorrect passcode.")
+else:
+    stage3_unlocked = False
+    st.caption(
+        "🔒 Stage 3 is locked - no STAGE3_PASSCODE configured. Set it in `.env` (local) or "
+        "Streamlit secrets (deployed) to enable it."
+    )
+
 use_llm = st.checkbox(
     "Also run stage 3 (LLM-assisted resolution)",
     value=False,
-    disabled=api_key is None,
+    disabled=(api_key is None) or (not stage3_unlocked),
     help=(
         "Uses Claude to resolve ambiguous/near-miss exceptions with logged reasoning. "
         "Costs a small number of API calls (a few cents at most for a typical batch)."
@@ -223,6 +280,12 @@ if st.session_state.results is not None:
 
     results_df = results_to_dataframe(results, ledger)
 
+    result_column_config = {
+        "explanation": st.column_config.TextColumn("explanation", width="large"),
+        "reference_id": st.column_config.TextColumn("reference_id", width="small"),
+        "payment_id": st.column_config.TextColumn("payment_id", width="small"),
+    }
+
     st.subheader("📋 Results table")
     filter_choice = st.selectbox("Show", ["All rows", "Matched only", "Exceptions only"])
     if filter_choice == "Matched only":
@@ -231,16 +294,34 @@ if st.session_state.results is not None:
         display_df = results_df[~results_df["matched"]]
     else:
         display_df = results_df
-    st.dataframe(display_df, use_container_width=True)
+    st.dataframe(display_df, use_container_width=True, column_config=result_column_config)
 
     st.subheader("🔍 Exception list")
     exception_summary = summarize_exceptions(results)
     if exception_summary:
-        st.bar_chart(pd.Series(exception_summary, name="count"))
-        st.dataframe(
-            results_df[~results_df["matched"]][["ledger_id", "exception_type", "explanation"]],
-            use_container_width=True,
+        # st.bar_chart's horizontal=True still truncates long category names
+        # in a fixed-width label gutter - a plain Altair chart with an
+        # explicit labelLimit gives full-width labels instead.
+        chart_df = pd.DataFrame(
+            {"exception_type": list(exception_summary.keys()), "count": list(exception_summary.values())}
         )
+        chart = (
+            alt.Chart(chart_df)
+            .mark_bar(color="#6366F1")
+            .encode(
+                x=alt.X("count:Q", title="Count"),
+                y=alt.Y("exception_type:N", sort="-x", title=None, axis=alt.Axis(labelLimit=400)),
+            )
+        )
+        st.altair_chart(chart, use_container_width=True)
+
+        # A dataframe grid truncates the explanation text with no way to
+        # read the rest without extra clicks - exactly the wrong place for
+        # friction, since these explanations are the point of the feature.
+        # A plain per-row list keeps every word visible with no interaction.
+        for _, row in results_df[~results_df["matched"]].iterrows():
+            st.markdown(f"**{row['ledger_id']}** · `{row['exception_type']}`")
+            st.caption(row["explanation"])
     else:
         st.info("No exceptions - every ledger row was resolved.")
 
