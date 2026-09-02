@@ -7,7 +7,7 @@ Read this file first at the start of every session — it's the single source of
 **Deadline:** Applications close September 5, 2026
 **Goal:** Agent that closes a finance-ops reconciliation loop across a 50+ record batch, reports match rate + honest exception list.
 
-## Status: All required deliverables built + verified. README written. Only remaining item: user deploys to Streamlit Cloud (needs their own account/action). Pitch prep materials also built.
+## Status: PROJECT COMPLETE. All required deliverables built, verified, and live. Remaining work is optional (pitch prep, further polish) — no required items left.
 
 ## Done
 - Repo scaffolded: `src/ingest`, `src/matching`, `src/reporting`, `src/exceptions`, `dashboard`, `tests`, `docs`, `.github/workflows`; `.gitignore`, `.env.example`, `requirements.txt`, `README.md`.
@@ -68,9 +68,15 @@ Read this file first at the start of every session — it's the single source of
   - `docs/PITCH_SCRIPT.md` — a timed 5-minute video script (hook -> what was built -> live demo -> honest results story -> why the LLM stage matters -> close), explicit instruction to internalize rather than memorize verbatim, plus a pre-recording checklist.
   - `docs/QA_PREP.md` — anticipated questions grouped by theme (data/scope, architecture/design, accuracy/honesty, LLM specifics, engineering/deployment, product framing, personal/growth) with model answers explaining the *reasoning*, not just the fact — includes questions a technical judge would ask (how do you prevent double-matching, what happens when the LLM response fails to parse) and ones a non-technical judge would ask (who would use this, what do they walk away with). One question ("what did you learn") is deliberately left for the user to answer genuinely rather than scripted.
 
-## Next
-1. **User deploys to Streamlit Community Cloud** — needs their own account + GitHub authorization + pasting the API key into Streamlit's secrets UI, none of which Claude can do on their behalf. Steps already given to user in chat. Once deployed, update the README's placeholder deploy link.
-2. User should read the three pitch-prep docs, practice the script with a timer, and rehearse Q&A out loud — the docs are prep material, not a substitute for actually understanding the project.
+- **Deployed live**: user deployed to Streamlit Community Cloud themselves (their account, their GitHub auth, their API key in Streamlit's secrets UI — https://razorpay-recon-agent-bfar8jdwabaejt6qrj9u7u.streamlit.app/). Confirmed working live via browser.
+
+- **Visual polish pass** — user's first reaction to the deployed app was "doesn't look that impressive"; asked a clarifying question rather than guessing, confirmed it was about visual polish specifically (not the numbers or missing content). Added: `.streamlit/config.toml` custom dark navy/indigo theme (was plain default Streamlit before), a page icon, a capability badge row, a 3-step "how it works" strip so first load isn't just an empty form, icons on every section header, dividers, and styled metric cards. No behavior changes — verified locally end to end before pushing, then confirmed the Streamlit Cloud auto-redeploy picked it up correctly via live browser check.
+
+- README's live-demo link and the pitch script's placeholder URL both updated to the real deployed link.
+
+## Next (all optional — no required deliverables remain)
+1. User should read the three pitch-prep docs (`docs/EXPLAINER.md`, `docs/PITCH_SCRIPT.md`, `docs/QA_PREP.md`), practice the script with a timer, and rehearse Q&A out loud — the docs are prep material, not a substitute for actually understanding the project. This is what the user is dedicating time to next.
+2. If there's time left after that: settlement-level reconciliation (settlements are already generated, just not wired into matching), batching stage-3 LLM calls, multi-currency support — none of these are required, just possible extensions if the user wants to keep building.
 
 ## How to run things
 ```bash

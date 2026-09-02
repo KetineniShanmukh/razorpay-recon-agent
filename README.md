@@ -6,7 +6,7 @@ An agent that reconciles a payments source against an internal ledger, closing t
 match rate, a measured accuracy score, and a classified, honest exception list — no cherry-picked
 demo runs.
 
-**Live demo:** _[add Streamlit Community Cloud link here after deploying]_
+**Live demo:** https://razorpay-recon-agent-bfar8jdwabaejt6qrj9u7u.streamlit.app/
 **Repo:** https://github.com/KetineniShanmukh/razorpay-recon-agent
 
 ## The problem

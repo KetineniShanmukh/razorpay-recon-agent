@@ -69,7 +69,8 @@ have — the brief explicitly allows this.")*
 ## 4:25 – 5:00 — Close (35s)
 
 > "This is fully built end to end: the matching engine, the exception classifier, the LLM stage,
-> a live dashboard, Dockerized and verified through CI on every push, deployed at [your live URL].
+> a live dashboard, Dockerized and verified through CI on every push, deployed at
+> razorpay-recon-agent-bfar8jdwabaejt6qrj9u7u.streamlit.app.
 > The whole thing is on GitHub, public, with the real numbers in the README, not just claimed in a
 > slide. I think this maps directly to what a finance team actually needs — not a demo that works
 > once, but a system that's honest about its own limits. Thanks for watching."
