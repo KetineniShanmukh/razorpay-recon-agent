@@ -27,7 +27,38 @@ from src.reporting.report import build_summary_text, results_to_dataframe
 
 load_dotenv()
 
-st.set_page_config(page_title="Reconciliation + Exception Intelligence Engine", layout="wide")
+st.set_page_config(
+    page_title="Reconciliation + Exception Intelligence Engine",
+    page_icon="🧾",
+    layout="wide",
+)
+
+st.markdown(
+    """
+    <style>
+    div[data-testid="stMetric"] {
+        background-color: #141B2D;
+        border: 1px solid #2A3350;
+        border-radius: 10px;
+        padding: 14px 16px 10px 16px;
+    }
+    div[data-testid="stMetricValue"] { color: #A5B4FC; }
+    .badge-row { margin: 4px 0 18px 0; }
+    .badge {
+        display: inline-block;
+        background-color: #1E2740;
+        color: #A5B4FC;
+        border: 1px solid #363F63;
+        border-radius: 999px;
+        padding: 4px 12px;
+        margin-right: 8px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 def get_anthropic_key() -> str | None:
@@ -50,15 +81,38 @@ for key in ["payments", "ledger", "ground_truth", "results", "audit_log"]:
     if key not in st.session_state:
         st.session_state[key] = None
 
-st.title("Multi-Source Reconciliation + Exception Intelligence Engine")
+st.title("🧾 Multi-Source Reconciliation + Exception Intelligence Engine")
 st.caption(
     "Reconciles synthetic Razorpay-schema payments against a noisy internal ledger using a "
-    "3-stage matching engine (deterministic -> fuzzy -> LLM-assisted), then reports an honest, "
-    "classified exception list. Built for the Razorpay AI Buildathon 2026 - Track 04 "
+    "3-stage matching engine (deterministic → fuzzy → LLM-assisted), then reports an honest, "
+    "classified exception list. Built for the Razorpay AI Buildathon 2026 · Track 04 "
     "(AI Finance Controller)."
 )
+st.markdown(
+    """
+    <div class="badge-row">
+        <span class="badge">⚡ 3-Stage Matching</span>
+        <span class="badge">🤖 LLM-Assisted Resolution</span>
+        <span class="badge">✅ Ground-Truth Scored</span>
+        <span class="badge">🔍 Honest Exception List</span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
-st.header("1. Data")
+how_cols = st.columns(3)
+with how_cols[0]:
+    st.markdown("**① Ingest**")
+    st.caption("Synthetic payments + a noisy internal ledger, styled after Razorpay's real API schema.")
+with how_cols[1]:
+    st.markdown("**② Match**")
+    st.caption("Deterministic → fuzzy → LLM-assisted, cheapest and most confident first.")
+with how_cols[2]:
+    st.markdown("**③ Explain**")
+    st.caption("Every unresolved row gets a real, classified reason — never a bare \"unresolved.\"")
+
+st.divider()
+st.header("📥 1. Data")
 data_source = st.radio(
     "Choose a data source", ["Generate synthetic demo data", "Upload my own CSV files"], horizontal=True,
 )
@@ -105,7 +159,8 @@ if st.session_state.payments is not None:
         lcol.write("Internal ledger (first 10)")
         lcol.dataframe(pd.DataFrame(st.session_state.ledger).head(10))
 
-st.header("2. Run reconciliation")
+st.divider()
+st.header("⚙️ 2. Run reconciliation")
 
 api_key = get_anthropic_key()
 use_llm = st.checkbox(
@@ -145,7 +200,8 @@ if st.session_state.results is not None:
     results = st.session_state.results
     ledger = st.session_state.ledger
 
-    st.header("3. Results")
+    st.divider()
+    st.header("📊 3. Results")
 
     n_total = len(results)
     n_matched = sum(1 for r in results if r["matched"])
@@ -167,7 +223,7 @@ if st.session_state.results is not None:
 
     results_df = results_to_dataframe(results, ledger)
 
-    st.subheader("Results table")
+    st.subheader("📋 Results table")
     filter_choice = st.selectbox("Show", ["All rows", "Matched only", "Exceptions only"])
     if filter_choice == "Matched only":
         display_df = results_df[results_df["matched"]]
@@ -177,7 +233,7 @@ if st.session_state.results is not None:
         display_df = results_df
     st.dataframe(display_df, use_container_width=True)
 
-    st.subheader("Exception list")
+    st.subheader("🔍 Exception list")
     exception_summary = summarize_exceptions(results)
     if exception_summary:
         st.bar_chart(pd.Series(exception_summary, name="count"))
@@ -189,7 +245,7 @@ if st.session_state.results is not None:
         st.info("No exceptions - every ledger row was resolved.")
 
     if st.session_state.audit_log:
-        st.subheader("Stage 3 audit trail")
+        st.subheader("🤖 Stage 3 audit trail")
         st.caption("Every LLM call's full prompt, raw response, and reasoning - not just the final verdict.")
         for entry in st.session_state.audit_log:
             with st.expander(f"{entry['ledger_id']} - {entry['decision']} (confidence: {entry['confidence']})"):
@@ -197,7 +253,8 @@ if st.session_state.results is not None:
                 st.write(f"**Candidates shown:** {entry['candidates_shown']}")
                 st.code(entry["prompt"], language="text")
 
-    st.header("4. Download report")
+    st.divider()
+    st.header("📦 4. Download report")
     dl_cols = st.columns(3)
     dl_cols[0].download_button(
         "Download full results (CSV)",
