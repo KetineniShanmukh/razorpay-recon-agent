@@ -1,98 +1,155 @@
-# 5-Minute Pitch Script (Final)
+# 5-Minute Pitch Script (Final — Delivery Edition)
 
-**How to use this:** don't memorize word-for-word — read it a few times, understand *why* each
-line is there, then say it in your own words. A judge can tell the difference between reciting
-and explaining. Total runtime target: ~4:55, leaving a little buffer under the 5:00 limit.
+**You don't need to be a good speaker for this to land well. You need to sound like someone who
+knows their project cold and isn't rushing.** That's it. Judges aren't scoring stage presence —
+they're scoring whether you understand what you built. Slow and slightly awkward beats fast and
+smooth-sounding-but-shaky, every time.
 
-This version is structured around Razorpay's own published judging criteria (seen on their
-buildathon page): **Problem taste, Build quality, AI judgment, Failure recovery.** Each section
-below is labeled with which one it's mainly answering — that label is for you, not something to
-say out loud.
+## How to use this
 
-Fill in your live deploy link before recording if it's not already muscle memory. Practice with a
-timer at least twice — first passes almost always run long.
+- Read it out loud 3-4 times. By the third time you'll naturally start saying it in your own
+  words — that's correct, let it happen. Reciting from memory sounds worse than explaining
+  something you understand.
+- The **/** marks are pause points. Actually pause there — half a second, just a breath. It feels
+  like forever to you and sounds completely normal to a listener. Nervous speakers rush through
+  pauses; that's the single biggest thing to fight.
+- Sentences here are short on purpose. Short sentences are hard to trip over. If you stumble on a
+  word, stop, take a breath, say the sentence again slower. Don't apologize, don't say "sorry" —
+  just restart the sentence. Judges have seen this a hundred times; it reads as calm, not weak.
+- Bracketed text in *italics* is a stage direction for you — never say it out loud.
 
 ---
 
 ## 0:00 – 0:10 — Self-intro (10s)
 
-*(Face to camera.)*
+*(Face to camera. Sit up, both hands visible, small smile. This is the easiest part — it's just
+your name.)*
 
-> "Hi, I'm Shanmukh Ketineni, a final-year ECE student, and this is ReconIQ — my submission for
-> the AI Finance Controller track."
+> "Hi, I'm Shanmukh Ketineni. / I'm a final-year ECE student, / and this is ReconIQ — my submission
+> for the AI Finance Controller track."
 
-## 0:10 – 0:35 — Hook · *Problem taste* (25s)
+## 0:10 – 0:35 — The problem (25s)
 
-> "Every company that takes payments has to prove their bank records match their internal books.
-> In practice, they never line up perfectly — typos, late entries, duplicate rows, small fee
-> deductions — and someone has to manually reconcile them by hand. ReconIQ automates that loop,
-> and — this is the important part — it's honest about what it *couldn't* figure out, instead of
-> pretending everything matched."
+> "Here's the problem. / Every company that takes payments has to check that their bank records
+> match their internal books. / In practice, they never match perfectly. / Typos. Late entries.
+> Duplicate rows. Small fee deductions. / Someone has to sit down and reconcile all of it by hand.
+>
+> ReconIQ automates that. / And it does one more thing — / it's honest about what it *couldn't*
+> figure out, / instead of pretending everything matched."
 
 ## 0:35 – 1:15 — What you built (40s)
 
-> "It reconciles two data sources: synthetic payment records built to exactly match Razorpay's
-> real API schema, and a noisy internal ledger derived from them. Matching runs through three
-> stages, cheapest and most certain first — deterministic exact-match, then fuzzy matching with
-> wider tolerance, and only the genuinely ambiguous leftovers go to Claude, which has to return a
-> decision with reasoning, logged in full. Anything still unresolved gets classified with a
-> specific reason — not 'unresolved,' but *why*: amount mismatch, missing counterpart, duplicate,
-> fee delta."
-
-*(Skip if short on time: "I used synthetic data matching Razorpay's real schema since a live
-account needs PAN KYC I don't have — the brief explicitly allows this.")*
-
-## 1:15 – 2:30 — Live demo · *Build quality* (75s)
-
-*(Have the dashboard already open in a tab before recording.)*
-
-> "Let me show you." *(Screen share.)* "I'll generate a fresh batch of 80 payments and ledger rows
-> right now — nothing pre-computed." *(Click Generate, click Run.)* "We get a match rate, and —
-> because I kept a hidden ground-truth key completely out of the matching engine — a *measured*
-> accuracy score against the real correct answers, not a number I'm just claiming." *(Point at the
-> metrics.)* "Filterable results, and an exception list classified by reason — this one's a
-> duplicate we caught and flagged instead of double-counting, this one's a payment recorded late."
+> "It reconciles two data sources. / Synthetic payment records, built to match Razorpay's real API
+> schema exactly. / And a noisy internal ledger, derived from those payments.
 >
-> "One more thing worth showing —" *(type the passcode)* "— stage 3 is gated behind a passcode on
-> this public link, since it triggers real billed API calls with no rate limit otherwise. Not
-> hiding it, just being responsible with a public URL." *(Check the box, click Run again.)* "And
-> now those same exceptions get resolved with logged reasoning instead of staying stuck."
+> Matching runs in three stages. / Cheapest and most certain first. / Stage one: exact matching. /
+> Stage two: fuzzy matching, with wider tolerance. / Only what's left after that — the genuinely
+> unclear cases — goes to Claude. / It has to return a decision *with* reasoning, and that
+> reasoning gets logged in full.
+>
+> Anything still unresolved gets a real reason attached. / Not 'unresolved.' / Something specific —
+> amount mismatch, missing counterpart, duplicate, fee delta."
 
-## 2:30 – 3:10 — The honest results (40s)
+*(Only say this next line if you're running ahead of time — it's safe to cut: "I used synthetic
+data because a live Razorpay account needs PAN KYC I don't have — the brief explicitly allows
+this.")*
 
-> "Here's the part I'm proudest of. My first version scored a suspicious 100% accuracy across
-> every test run. That should've felt like a win — it wasn't. It meant my tolerances happened to
-> match noise I'd generated myself. So I deliberately added noise the rules genuinely can't
-> resolve, specifically to force real failures into the numbers. Now: 93 to 99 percent, a real and
-> different mistake list every run. That's the number I actually stand behind."
+## 1:15 – 2:30 — Live demo (75s)
 
-## 3:10 – 3:45 — AI judgment · *the right tool, and where I chose not to use one* (35s)
+*(Open the dashboard in a tab before you hit record. Don't open it live — every second of loading
+is a second you're silently panicking on camera.)*
 
-> "On using AI to build this — the three-stage design is itself a judgment call about when *not*
-> to use AI. Stages one and two never touch an LLM at all; they're plain rules, because an exact
-> reference match is a certainty, not something worth spending a model call on. Claude only ever
-> sees the handful of rows left over that genuinely need judgment — usually single digits out of
-> eighty. The right tool, only where it's actually needed."
+> "Let me show you." *(Switch to screen share.)*
+>
+> "I'll generate a fresh batch right now — 80 payments, 80 ledger rows. / Nothing pre-computed."
+> *(Click Generate. Click Run. If it takes a second, that's fine — just keep talking: "This is
+> running the full pipeline now.")*
+>
+> "Here's the match rate. / And here's the part that matters — / measured accuracy. / Not a number
+> I'm claiming. / I kept a hidden answer key completely out of the matching engine, / and this
+> score is checked against that. / It's measured, not self-reported."
+>
+> *(Point at the exception list.)* "Every unresolved row gets a real reason. / This one's a
+> duplicate we caught. / This one was recorded a few days late."
+>
+> "One more thing." *(Type the passcode.)* "Stage three — the Claude step — is behind a passcode on
+> this public link. / It costs real, billed API calls, with no rate limit otherwise. / So I gated
+> it. / Not hiding it — just being responsible with a public URL." *(Check the box, click Run
+> again.)* "And now those same exceptions get resolved, / with the reasoning logged right there."
 
-## 3:45 – 4:25 — Failure recovery (40s)
+## 2:30 – 3:10 — The honest number (40s)
 
-> "I built this with Claude Code, directing every decision above. The obstacles were real: no PAN
-> card meant no live Razorpay data, so I built a schema-accurate synthetic generator instead,
-> disclosed openly. Testing stage 3 live against the real API — not just mocks — surfaced two bugs
-> mocks never would have caught: an empty response from a token-budget issue, and a genuine model
-> refusal on a completely benign question. And after deploying, I critiqued my own live app and
-> found the LLM stage was open to any visitor with no rate limit — that's exactly why it's
-> passcode-gated now."
+> "This next part is the one I'm actually proudest of. / My first version of this scored a hundred
+> percent accuracy. / Every single test run. / That felt like a win. / It wasn't.
+>
+> It meant my matching tolerances happened to line up exactly / with noise I'd generated myself. /
+> A real judge should distrust a perfect score. / So I went back in / and deliberately added noise
+> the rules genuinely can't resolve on their own.
+>
+> Now it's ninety-three to ninety-nine percent, / and it's different every run. / That's the number
+> I actually stand behind."
+
+## 3:10 – 3:45 — Where AI fits, and where it doesn't (35s)
+
+> "One thing I want to be direct about — / how I used AI here isn't just stage three. / It's the
+> whole design.
+>
+> Stages one and two never call an LLM at all. / They're plain rules. / An exact reference match is
+> a certainty — / there's no reason to spend a model call proving something you already know. /
+> Claude only ever sees the handful of rows left over / that genuinely need judgment. / Usually
+> single digits, out of eighty.
+>
+> The right tool, / only where it's actually needed."
+
+## 3:45 – 4:25 — What broke, and what I did (40s)
+
+> "I built this with Claude Code, directing every decision. / A few things actually broke along the
+> way.
+>
+> No PAN card meant no live Razorpay data — / so I built a schema-accurate synthetic generator
+> instead, and said so, openly.
+>
+> Testing stage three live, against the real API, / not just mocks — / that surfaced two bugs mocks
+> never would have caught. / An empty response from a token-budget issue. / And one genuine model
+> refusal, on a completely harmless question.
+>
+> And after I deployed it, / I turned around and critiqued my own live app. / Found the LLM stage
+> was wide open — / any visitor, no rate limit. / That's exactly why it's passcode-gated now."
 
 ## 4:25 – 4:55 — Close (30s)
 
-> "This is fully built end to end — matching engine, exception classifier, LLM stage, dashboard,
-> Dockerized, CI-verified on every push, deployed live. It's all public on GitHub with the real
-> numbers in the README, not just claimed in a slide. I think this is what a finance team actually
-> needs — not a demo that works once, but a system that's honest about its own limits. Thanks for
-> watching."
+*(Back to face on camera if you can. Slow down here — this is the last thing they hear.)*
+
+> "This is built end to end. / Matching engine, exception classifier, LLM stage, dashboard. /
+> Dockerized. / Tested on every push. / Deployed live right now.
+>
+> It's all public on GitHub, / with the real numbers sitting in the README — / not just claimed in
+> a slide.
+>
+> I think this is what a finance team actually needs. / Not a demo that works once — / a system
+> that's honest about its own limits.
+>
+> Thanks for watching."
 
 ---
+
+## Before you record — read this once
+
+**The nerves don't go away by the time you hit record. They go away by the third take.** Plan for
+3 takes, not 1. Nobody nails this cold.
+
+- **Speed is the enemy, not mistakes.** A nervous person's default is to speed up. Force yourself
+  to go slower than feels natural — it will sound normal on playback, not slow. If in doubt, slow
+  down more.
+- **Look at the camera lens, not your own face on screen**, during the intro and close. It's the
+  single biggest thing that makes a recording feel like eye contact instead of a read-aloud.
+- **If you fumble a sentence, stop, breathe, say it again.** You can trim the dead air in editing,
+  or just leave it — a short pause reads as thoughtful, not incompetent.
+- **Smile slightly during the self-intro and close.** Costs nothing, changes your tone of voice
+  even if no one's consciously watching for it.
+- **Do the live demo section as a separate practice run**, clicks and all, at least 3 times, before
+  you ever hit record for real. This is the section most likely to go sideways, and it's the one
+  you can fully rehearse.
 
 ## Pre-recording checklist
 
@@ -100,9 +157,10 @@ account needs PAN KYC I don't have — the brief explicitly allows this.")*
 - [ ] Dashboard demo data generates in a few seconds — don't demo on a slow connection
 - [ ] Passcode is ready to type without fumbling (`buildathon2026` unless you've changed the
       Streamlit Cloud secret — verify it still matches before recording)
-- [ ] Practice the live-demo section separately until the clicks are muscle memory
-- [ ] Time yourself at least twice with a stopwatch — most people run long on the first pass
-- [ ] Have a backup: if the live demo breaks during recording, know you can fall back to
-      describing the dashboard from a screenshot instead of dead air
+- [ ] Practiced the live-demo section separately until the clicks are muscle memory
+- [ ] Timed yourself at least twice with a stopwatch — most people run long on the first pass
+- [ ] Backup plan ready: if the live demo breaks during recording, fall back to describing the
+      dashboard from a screenshot instead of dead air
 - [ ] Recording setup: face-cam bubble + screen share (Loom does this automatically) so the
       self-intro and close have you on camera, not just a voiceover
+- [ ] Budgeted for 3 takes, not 1
