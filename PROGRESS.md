@@ -7,7 +7,7 @@ Read this file first at the start of every session — it's the single source of
 **Deadline:** Applications close September 5, 2026
 **Goal:** Agent that closes a finance-ops reconciliation loop across a 50+ record batch, reports match rate + honest exception list.
 
-## Status: PROJECT COMPLETE + hardened after an honest self-critique. ⚠️ ACTION NEEDED FROM USER: add `STAGE3_PASSCODE` to Streamlit Cloud secrets — until then, stage 3 is locked for everyone including the owner (fails closed by design, safer than leaving it open).
+## Status: PROJECT COMPLETE + hardened + application materials finalized. User confirmed the `STAGE3_PASSCODE` secret is set on Streamlit Cloud and verified working live. Remaining work is entirely on the user's side: record the pitch video, fill and submit the application form.
 
 ## Done
 - Repo scaffolded: `src/ingest`, `src/matching`, `src/reporting`, `src/exceptions`, `dashboard`, `tests`, `docs`, `.github/workflows`; `.gitignore`, `.env.example`, `requirements.txt`, `README.md`.
@@ -82,8 +82,19 @@ Read this file first at the start of every session — it's the single source of
   - All four verified working via direct DOM inspection + screenshots in a local browser session before pushing, not just assumed from the diff. 31/31 tests still passing.
   - Pushed into a non-fast-forward conflict with a `.devcontainer/devcontainer.json` the user had added directly on GitHub — unrelated, no overlap, resolved with a clean rebase.
 
-## Next
-- **User must add `STAGE3_PASSCODE` to the Streamlit Cloud app's secrets** (same place as `ANTHROPIC_API_KEY`) — pick any value, e.g. `STAGE3_PASSCODE = "whatever-you-want"`. Until this is done, stage 3 is locked on the live deployed app. Locally, `.env` already has a test value (`test-local-1234`) for development — change it to something real if desired.
+- **Confirmed live**: user added `STAGE3_PASSCODE` to Streamlit Cloud secrets; verified directly via DOM inspection on the actual deployed URL (not localhost) that the checkbox is disabled with no/wrong passcode and enabled with the correct one (`buildathon2026`). Local `.env` synced to the same value.
+
+- **Application materials finalized, based on the actual Google Form and the buildathon site's published judging criteria** (user shared screenshots of both):
+  - Form fields: Track Selection, Project Name/Title, Project Objectives, GitHub Repository URL, 5-min Pitch Video Link, Build Challenges & Technical Obstacles, Final Submission Confirmation (irreversible — "no further changes after submitting").
+  - Judging criteria (from razorpay.com/buildathon): **Problem taste**, **Build quality**, **AI judgment** ("the right tool in the right place, and where you chose not to use one"), **Failure recovery** ("what broke, and what you did about it"). This directly validated the whole honesty-about-Claude-Code strategy — AI judgment is a literally scored category, not a risk to manage around.
+  - `docs/PITCH_SCRIPT.md` rewritten as a final version, restructured around those four criteria explicitly (each section labeled internally with which criterion it answers), ~4:55 total runtime. Added a new "AI judgment" beat making explicit that stages 1+2 deliberately never call an LLM — that's itself the "where I chose not to use AI" answer, not just an architecture detail.
+  - `docs/APPLICATION_ANSWERS.md` (new) — ready-to-paste drafts for "Project Name" (`ReconIQ`), "Project Objectives," and "Build Challenges & Technical Obstacles" (the honest-obstacles paragraph: PAN/KYC constraint, the 100%-accuracy red flag, two real bugs found via live API testing, the security hole found via self-critique), plus a pre-submission checklist given the form's irreversibility warning.
+  - Project's submission name is **ReconIQ** — shorter branded name for the form, distinct from the fuller repo title.
+
+## Next (all on the user's side now — no more code changes needed)
+1. Record the pitch video following `docs/PITCH_SCRIPT.md` (hybrid: face-to-camera for intro/close, screen share with voiceover for the demo).
+2. Upload it somewhere shareable (Loom auto-generates a link; YouTube "Unlisted" also works) and get the link.
+3. Fill out the application form using `docs/APPLICATION_ANSWERS.md`, run through its pre-submission checklist, then submit — submission is final, no edits after.
 
 ## Next (all optional beyond the passcode secret — no other required deliverables remain)
 1. User should read the three pitch-prep docs (`docs/EXPLAINER.md`, `docs/PITCH_SCRIPT.md`, `docs/QA_PREP.md`), practice the script with a timer, and rehearse Q&A out loud — the docs are prep material, not a substitute for actually understanding the project. This is what the user is dedicating time to next.
