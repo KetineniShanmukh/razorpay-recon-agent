@@ -17,6 +17,11 @@ smooth-sounding-but-shaky, every time.
   word, stop, take a breath, say the sentence again slower. Don't apologize, don't say "sorry" —
   just restart the sentence. Judges have seen this a hundred times; it reads as calm, not weak.
 - Bracketed text in *italics* is a stage direction for you — never say it out loud.
+- **If you fumble badly and want to stop, hit Pause, not Stop.** Loom's floating recording
+  toolbar (the one that appears while you're actually capturing, separate from playback controls)
+  has a pause/resume button. Pause, breathe for a few seconds, resume, and just re-say the last
+  sentence. It's still one continuous recording — you don't lose the take and don't have to start
+  over from the beginning.
 
 ---
 
@@ -56,26 +61,35 @@ this.")*
 
 ## 1:15 – 2:30 — Live demo (75s)
 
-*(Open the dashboard in a tab before you hit record. Don't open it live — every second of loading
-is a second you're silently panicking on camera.)*
+*(This is the section that goes long if you're not ready for it — it's where a first take usually
+breaks. Two things to do before you ever hit record:*
+
+*1. Open the dashboard in its own tab and leave it open. Don't open it live — every second of
+loading is a second you're silently panicking on camera.*
+
+*2. Do one full silent dry run right before recording — click Generate, click Run, type the
+passcode, run stage 3, all of it, off camera. This wakes up the app (free hosting can be slow on a
+cold start) so it's fast when you're actually rolling, and it makes the clicks muscle memory so
+you're not hunting for buttons while also trying to talk.)*
 
 > "Let me show you." *(Switch to screen share.)*
 >
-> "I'll generate a fresh batch right now — 80 payments, 80 ledger rows. / Nothing pre-computed."
-> *(Click Generate. Click Run. If it takes a second, that's fine — just keep talking: "This is
-> running the full pipeline now.")*
+> "I'll generate a fresh batch right now — 80 payments, 80 ledger rows." *(Click Generate, click
+> Run.)* *(If it takes a moment, you don't need to fill the silence — a second of quiet while
+> something visibly loads on screen is completely normal. If it drags, one line is enough: "Running
+> the full pipeline now.")*
 >
-> "Here's the match rate. / And here's the part that matters — / measured accuracy. / Not a number
-> I'm claiming. / I kept a hidden answer key completely out of the matching engine, / and this
-> score is checked against that. / It's measured, not self-reported."
+> "Here's the match rate. / And here's the part that matters — measured accuracy. / Not a number
+> I'm claiming — / I kept a hidden answer key out of the matching engine, / and this score is
+> checked against that."
 >
-> *(Point at the exception list.)* "Every unresolved row gets a real reason. / This one's a
-> duplicate we caught. / This one was recorded a few days late."
+> *(Point at the exception list — you don't have to narrate every word, just point.)* "Every
+> unresolved row gets a real reason, not just 'unresolved.'"
 >
-> "One more thing." *(Type the passcode.)* "Stage three — the Claude step — is behind a passcode on
-> this public link. / It costs real, billed API calls, with no rate limit otherwise. / So I gated
-> it. / Not hiding it — just being responsible with a public URL." *(Check the box, click Run
-> again.)* "And now those same exceptions get resolved, / with the reasoning logged right there."
+> "One more thing." *(Type the passcode — this is the one you rehearsed, so it's fast.)* "Stage
+> three is gated behind a passcode on this public link, / since it triggers real billed API calls
+> with no rate limit otherwise." *(Check the box, click Run again.)* "And now those exceptions get
+> resolved, with the reasoning logged right there."
 
 ## 2:30 – 3:10 — The honest number (40s)
 
@@ -143,8 +157,8 @@ is a second you're silently panicking on camera.)*
   down more.
 - **Look at the camera lens, not your own face on screen**, during the intro and close. It's the
   single biggest thing that makes a recording feel like eye contact instead of a read-aloud.
-- **If you fumble a sentence, stop, breathe, say it again.** You can trim the dead air in editing,
-  or just leave it — a short pause reads as thoughtful, not incompetent.
+- **If you fumble a sentence, pause (don't stop), breathe, say it again.** A short pause reads as
+  thoughtful, not incompetent — and it keeps you in the same take instead of starting over.
 - **Smile slightly during the self-intro and close.** Costs nothing, changes your tone of voice
   even if no one's consciously watching for it.
 - **Do the live demo section as a separate practice run**, clicks and all, at least 3 times, before
@@ -157,7 +171,10 @@ is a second you're silently panicking on camera.)*
 - [ ] Dashboard demo data generates in a few seconds — don't demo on a slow connection
 - [ ] Passcode is ready to type without fumbling (`buildathon2026` unless you've changed the
       Streamlit Cloud secret — verify it still matches before recording)
+- [ ] Did one full silent dry run of the demo (generate, run, passcode, stage 3) immediately
+      before recording, off camera, to wake up the app and warm up the clicks
 - [ ] Practiced the live-demo section separately until the clicks are muscle memory
+- [ ] Know where Loom's pause button is on the recording toolbar, not just the playback controls
 - [ ] Timed yourself at least twice with a stopwatch — most people run long on the first pass
 - [ ] Backup plan ready: if the live demo breaks during recording, fall back to describing the
       dashboard from a screenshot instead of dead air
