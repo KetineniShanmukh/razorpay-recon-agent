@@ -9,6 +9,11 @@ demo runs.
 **Live demo:** https://razorpay-recon-agent-bfar8jdwabaejt6qrj9u7u.streamlit.app/
 **Repo:** https://github.com/KetineniShanmukh/razorpay-recon-agent
 
+> **Want to try stage 3 (LLM-assisted resolution) yourself?** Everything else on the dashboard is
+> open with no login. Stage 3 is behind a passcode purely as an anti-abuse gate, since it triggers
+> real billed API calls on a public link — **passcode: `buildathon2026`**. Full explanation of why
+> it's gated is in [Trying stage 3 yourself](#trying-stage-3-yourself) below.
+
 ## The problem
 
 Every payment gateway transaction should have a matching entry in a company's internal
