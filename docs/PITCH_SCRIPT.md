@@ -27,7 +27,8 @@ smooth-sounding-but-shaky, every time.
 
 ## 0:00 – 0:10 — Self-intro (10s)
 
-*(Face to camera. Sit up, both hands visible, small smile. This is the easiest part — it's just
+*(Your face is the small bubble in the corner the whole time — that's completely normal for a
+Loom pitch, judges see it constantly. Sit up, small smile. This is the easiest part — it's just
 your name.)*
 
 > "Hi, I'm Shanmukh Ketineni. / I'm a final-year ECE student, / and this is ReconIQ — my submission
@@ -132,7 +133,8 @@ you're not hunting for buttons while also trying to talk.)*
 
 ## 4:25 – 4:55 — Close (30s)
 
-*(Back to face on camera if you can. Slow down here — this is the last thing they hear.)*
+*(Same bubble, no layout change needed. Slow down here — this is the last thing they hear, and
+it's worth looking straight at the lens for these last few lines instead of your screen.)*
 
 > "This is built end to end. / Matching engine, exception classifier, LLM stage, dashboard. /
 > Dockerized. / Tested on every push. / Deployed live right now.
@@ -157,6 +159,11 @@ you're not hunting for buttons while also trying to talk.)*
   down more.
 - **Look at the camera lens, not your own face on screen**, during the intro and close. It's the
   single biggest thing that makes a recording feel like eye contact instead of a read-aloud.
+- **If you're reading from notes, put them as close to the lens as your setup allows** — directly
+  under or beside the webcam, not off in a corner of the screen or on a second monitor. The
+  farther your notes are from the lens, the more your eyes visibly drop away from camera to read
+  them. Read a short phrase, glance back up at the lens, say it, glance down for the next one —
+  don't read continuously while talking.
 - **If you fumble a sentence, pause (don't stop), breathe, say it again.** A short pause reads as
   thoughtful, not incompetent — and it keeps you in the same take instead of starting over.
 - **Smile slightly during the self-intro and close.** Costs nothing, changes your tone of voice
